@@ -1,0 +1,188 @@
+create table empregado(
+	cpf integer PRIMARY KEY,
+	nome varchar(45) not null,
+	dt_admissao date,
+	turno varchar(8),
+	cargo varchar(10) not null,
+	cbo integer,
+	gerente integer,
+	chefia integer,
+	CONSTRAINT FK_gerente FOREIGN KEY (gerente) REFERENCES empregado(cpf), 
+	CONSTRAINT FK_chefia FOREIGN KEY (chefia) REFERENCES empregado(cpf) 
+);
+
+create table prato(
+	codigo integer PRIMARY KEY,
+	descricao varchar(45) not null,
+	valor float not null CHECK (valor>0)
+);
+
+create table pratoproduzido(
+	cod_prato integer,
+	cpf_cozinheiro integer,
+	PRIMARY KEY(cod_prato, cpf_cozinheiro),
+	CONSTRAINT PK_FK_codigoPrato FOREIGN KEY (cod_prato) REFERENCES prato(codigo),
+	CONSTRAINT PK_FK_cpfCozinheiro FOREIGN KEY (cpf_cozinheiro) REFERENCES empregado(cpf)
+);
+
+create table mesa(
+	numero integer PRIMARY KEY,
+	posicao varchar(20)
+);
+
+create table cliente(
+	cpfC integer PRIMARY KEY,
+	nome varchar(45) not null
+);
+
+create table pedidorealizado(
+	numerop integer PRIMARY KEY,
+	cpf_garcom integer,
+	cpf_cliente integer,
+	num_mesa integer,
+	dt_pedido date not null,
+	CONSTRAINT FK_cpfgarcom FOREIGN KEY (cpf_garcom) REFERENCES empregado(cpf),
+	CONSTRAINT FK_cpfcliente FOREIGN KEY (cpf_cliente) REFERENCES cliente(cpfc),
+	CONSTRAINT FK_nummesa FOREIGN KEY (num_mesa) REFERENCES mesa(numero)
+);
+
+create table pratopedido(
+	num_pedido integer,
+	cod_prato integer,
+	qtd_prato integer not null CHECK (qtd_prato>=0),
+	PRIMARY KEY(num_pedido, cod_prato),
+	CONSTRAINT PK_FK_numpedido FOREIGN KEY (num_pedido) REFERENCES pedidorealizado(numero),
+	CONSTRAINT PK_FK_cod_prato FOREIGN KEY (cod_prato) REFERENCES prato(codigo)
+);
+
+create table pedidopago(
+	cod_pedido integer not null,
+	cpf_balconista integer not null,
+	PRIMARY KEY(cod_pedido, cpf_balconista),
+	CONSTRAINT PK_FK_cod_pedido FOREIGN KEY (cod_pedido) REFERENCES pedidorealizado(numerop),
+	CONSTRAINT PK_FK_cpf_balconista FOREIGN KEY (cpf_balconista) REFERENCES empregado(cpf)
+);
+
+create table pedidoentregue(
+	num_mesa integer not null,
+	cpf_garcom integer not null,
+	PRIMARY KEY(num_mesa, cpf_garcom),
+	CONSTRAINT PK_FK_num_mesa FOREIGN KEY (num_mesa) REFERENCES mesa(numero),
+	CONSTRAINT PK_FK_cpf_garcom FOREIGN KEY (cpf_garcom) REFERENCES empregado(cpf)
+);
+
+------------------------------------------------------------
+--*ADICIONAR "INSERT", ANTES DE VALUES* --
+INSERT INTO EMPREGADO(cpf,nome,dt_admissao,turno,cargo,cbo,gerente,chefia) 
+
+--garçons
+--                                                                     cbo   ger   chef 
+
+values 
+ (457726,'Rogerio F'  ,'11/05/2001'  , 'noturno' , 'garcon'       ,    null, 895426,null),
+ (895426,'Garibaldo S','11/05/1941'  , 'noturno' , 'garcon'       ,    null, 895426,null),
+ (568478,'Edinaldo P' ,'11/05/1971'  , 'integral', 'garcon'       ,    null, 457826,null),
+ (987456,'Sandra M'   ,'11/05/1941'  , 'integral', 'garcon'       ,    null, 457826,null),
+
+--Cozinheiros --cbo é o identificador unico do cozinheiro
+--                                                                  cbo  ger   chef
+ (345898,'Rafael F'   ,'12/05/2002'   , 'noturno' , 'cozinheiro',   211, null, null ),
+ (145168,'Ingrydy S'  ,'12/05/1942'   , 'noturno' , 'cozinheiro',   212 ,null, 345898),
+ (145268,'Paulo S'    ,'12/05/1942'   , 'noturno' , 'cozinheiro',   213 ,null, 345898),
+
+ (654892,'Edileine P' ,'12/05/1972'  , 'integral','cozinheiro'  ,   221 ,null, null),
+ (156489,'Jerboa M'   ,'12/05/1942'  , 'integral','cozinheiro'  ,   222 ,null, 654892),
+ (145368,'Julieta S'  ,'12/05/1932'  , 'integral','cozinheiro'  ,   223 ,null, 654892),
+
+--balconista
+--                                                                  cbo   ger    chef
+ (457826,'Oscar Filho','13/06/2003'  ,'integral' ,'balconista'  ,   null, 895426,null),
+ (895426,'Rosana Pai' ,'13/07/1943'  ,'noturno'  ,'balconista'  ,   null, null  ,null);
+
+--Pratos
+
+INSERT INTO prato(codigo,descricao,valor) values (1, 'macarrão ao molho branco', 25,00);
+INSERT INTO prato(codigo,descricao,valor) values (2, 'macarrão bolonhesa'      , 20,00);
+INSERT INTO prato(codigo,descricao,valor) values (3, 'macarrão frutos mar'     , 56,00);
+INSERT INTO prato(codigo,descricao,valor) values (4, 'arroz carreteiro   '     , 15,00);
+INSERT INTO prato(codigo,descricao,valor) values (5, 'bifao da casa'           , 20,00);
+INSERT INTO prato(codigo,descricao,valor) values (6, 'mexidao do rafael'       , 16,00);
+INSERT INTO prato(codigo,descricao,valor) values (7, 'yakisoba especial'       , 26,00);
+INSERT INTO prato(codigo,descricao,valor) values (8, 'yakisoba veggie'         , 22,00);
+INSERT INTO prato(codigo,descricao,valor) values (9, 'Pastel Roxo'             , 12,00);
+INSERT INTO prato(codigo,descricao,valor) values (10, 'Pastel Azul'            , 16,00);
+
+--Mesa
+
+INSERT INTO mesa(numero,posicao) values (1,  'ArLivre');
+INSERT INTO mesa(numero,posicao) values (2,  'ArLivre');
+INSERT INTO mesa(numero,posicao) values (3,  'ArLivre');
+INSERT INTO mesa(numero,posicao) values (4,  'ArLivre');
+INSERT INTO mesa(numero,posicao) values (5,  'ArLivre');
+INSERT INTO mesa(numero,posicao) values (6,  'Dentro');
+INSERT INTO mesa(numero,posicao) values (7,  'Dentro');
+INSERT INTO mesa(numero,posicao) values (8,  'Dentro');
+INSERT INTO mesa(numero,posicao) values (9,  'Dentro');
+INSERT INTO mesa(numero,posicao) values (10, 'Dentro');
+INSERT INTO mesa(numero,posicao) values (11, 'Segundo Andar');
+INSERT INTO mesa(numero,posicao) values (12, 'Segundo Andar');
+INSERT INTO mesa(numero,posicao) values (13, 'Segundo Andar');
+INSERT INTO mesa(numero,posicao) values (14, 'Segundo Andar');
+INSERT INTO mesa(numero,posicao) values (15, 'Segundo Andar');
+INSERT INTO mesa(numero,posicao) values (16, 'Segundo Andar');
+INSERT INTO mesa(numero,posicao) values (17, 'Segundo Andar');
+INSERT INTO mesa(numero,posicao) values (18, 'VIP');
+INSERT INTO mesa(numero,posicao) values (19, 'VIP');
+INSERT INTO mesa(numero,posicao) values (20, 'VIP');
+
+--cliente
+INSERT INTO cliente(cpfc,nome) values (345891, 'Sandro Silva Costa'        );
+INSERT INTO cliente(cpfc,nome) values (123544, 'Carlos Cleiton Passos'     );
+INSERT INTO cliente(cpfc,nome) values (252465, 'Axel Silva Costa'          );
+INSERT INTO cliente(cpfc,nome) values (143154, 'Dilma Almeida Passos'      );
+INSERT INTO cliente(cpfc,nome) values (123124, 'Vilma Silva Costa'         );
+INSERT INTO cliente(cpfc,nome) values (143245, 'Cassimiro Cleiton Olvieira');
+INSERT INTO cliente(cpfc,nome) values (123423, 'Brenda Cleiton Costa'      );
+INSERT INTO cliente(cpfc,nome) values (165423, 'Rogerio Silva Olvieira'    );
+INSERT INTO cliente(cpfc,nome) values (788964, 'Canivete Almeida Costa'    );
+INSERT INTO cliente(cpfc,nome) values (124465, 'Fotocopia Silva Passos'    );
+INSERT INTO cliente(cpfc,nome) values (124435, 'Xerolaine Almeida Costa'   );
+INSERT INTO cliente(cpfc,nome) values (987678, 'Rodrigo Silva Olvieira'    );
+INSERT INTO cliente(cpfc,nome) values (686589, 'Cassio Cleiton Costa'      );
+INSERT INTO cliente(cpfc,nome) values (970754, 'Rosana Almeida Passos'     );
+INSERT INTO cliente(cpfc,nome) values (457896, 'Ivone Linda Teamo'         );
+INSERT INTO cliente(cpfc,nome) values (468866, 'Meda Nota Olvieira'        );
+INSERT INTO cliente(cpfc,nome) values (456754, 'Rogerio Silva Costa'       );
+--pedidorealizado
+INSERT INTO pedidorealizado(numero, cpf_garcom, cpf_cliente, num_mesa, dt_pedido) 
+values 
+ (1,  457826, 345891,  20, '10/06/2021'),
+ (2,  895426, 987678,  19, '11/06/2021'),
+ (3,  568478, 457896,  12, '12/06/2021'),
+ (4,  987456, 124465,  13, '13/06/2021'),
+ (5,  568478, 345891,  14, '13/06/2021'),
+ (6,  457826, 457896,  20, '14/06/2021'),
+ (7,  568478, 987678,  19, '15/06/2021'),
+ (8,  895426, 345891,  18, '15/06/2021'),
+ (9,  457826, 345891,  20, '15/06/2021'),
+ (10, 895426, 987678,  19, '16/06/2021'),
+ (11, 568478, 457896,  12, '16/06/2021'),
+ (12, 987456, 124465,  13, '16/06/2021'),
+ (13, 568478, 345891,  14, '16/06/2021'),
+ (14, 457826, 457896,  20, '17/06/2021'),
+ (15, 568478, 987678,  19, '17/06/2021'),
+ (16, 895426, 345891,  18, '17/06/2021'),
+ (17, 568478, 987678,  19, '18/06/2021'),
+ (18, 895426, 345891,  18, '18/06/2021'),
+ (19, 457826, 345891,  20, '18/06/2021'),
+ (20, 895426, 987678,  19, '18/06/2021'),
+ (21, 568478, 457896,  12, '19/06/2021');
+--pratopedido
+
+--pratoproduzido
+
+--pedidoentregue
+
+--pedidopago
+
+select * from empregado
